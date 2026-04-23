@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Биология - Пульт</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; background: #f0f0f0; text-align: center; overflow: hidden; }
+        .screen { padding: 20px; display: none; }
+        input { width: 80%; padding: 15px; margin: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 80vh; padding: 10px; }
+        button { border: none; color: white; font-size: 40px; font-weight: bold; border-radius: 10px; cursor: pointer; }
+        .a { background: #e21b3c; } .b { background: #1368ce; } .c { background: #d89e00; } .d { background: #26890c; }
+        .msg { margin-top: 40vh; font-size: 24px; font-weight: bold; color: #46178f; }
+    </style>
+</head>
+<body>
+    <div id="login" class="screen" style="display:block;">
+        <h2>Есіміңізді енгізіңіз</h2>
+        <input type="text" id="username" placeholder="Аты-жөні">
+        <button onclick="join()" style="background:#46178f; padding:15px; width:80%; font-size:20px;">Қосылу</button>
+    </div>
+
+    <div id="wait" class="screen">
+        <div class="msg" id="wait-msg">Мұғалімді күтіңіз...</div>
+    </div>
+
+    <div id="game" class="screen">
+        <div class="grid">
+            <button class="a" onclick="answer('A')">A</button>
+            <button class="b" onclick="answer('B')">B</button>
+            <button class="c" onclick="answer('C')">C</button>
+            <button class="d" onclick="answer('D')">D</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqOexBz5qOh_sBNjDl0wlacNkwMuUhgoU",
+            authDomain: "biologiatest1.firebaseapp.com",
+            projectId: "biologiatest1",
+            storageBucket: "biologiatest1.firebasestorage.app",
+            messagingSenderId: "952870084248",
+            appId: "1:952870084248:web:24f04ef5c261c3a0c23aed",
+            measurementId: "G-LZF9S0XE6",
+            databaseURL: "https://biologiatest1-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        let myId = "p_" + Date.now();
+        let correctLetter = "";
+        let answered = false;
+
+        window.join = function() {
+            const name = document.getElementById('username').value;
+            if(!name) return alert("Атыңызды жазыңыз!");
+            set(ref(db, 'players/' + myId), { name: name, score: 0 });
+            showScreen('wait');
+            listenGame();
+        }
+
+        function listenGame() {
+            onValue(ref(db, 'gameState'), (snap) => {
+                const state = snap.val();
+                if(!state) return;
+                if(state.status === 'question') {
+                    correctLetter = state.correct;
+                    answered = false;
+                    showScreen('game');
+                } else if (state.status === 'finish') {
+                    showScreen('wait');
+                    document.getElementById('wait-msg').innerText = "Ойын аяқталды!";
+                } else {
+                    showScreen('wait');
+                }
+            });
+        }
+
+        window.answer = async function(letter) {
+            if(answered) return;
+            answered = true;
+            showScreen('wait');
+            document.getElementById('wait-msg').innerText = "Жауап қабылданды!";
+
+            if(letter === correctLetter) {
+                const pRef = ref(db, 'players/' + myId);
+                const snap = await get(pRef);
+                const currentScore = snap.val().score || 0;
+                update(pRef, { score: currentScore + 100 });
+            }
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+    </script>
+</body>
+</html>

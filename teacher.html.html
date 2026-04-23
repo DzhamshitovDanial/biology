@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>Biology Quiz - Панель учителя</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #46178f; color: white; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn { background: #1368ce; color: white; border: none; padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 12px; margin: 10px; transition: 0.2s; font-weight: bold; }
+        .btn:hover { transform: scale(1.05); background: #1a7df0; }
+        #qrcode { display: inline-block; padding: 15px; background: white; border-radius: 10px; margin: 20px 0; }
+        .q-text { font-size: 28px; margin: 20px 0; background: white; color: #333; padding: 20px; border-radius: 10px; }
+        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .ans-item { padding: 20px; font-size: 22px; border-radius: 10px; color: white; font-weight: bold; }
+        .a { background: #e21b3c; } .b { background: #1368ce; } .c { background: #d89e00; } .d { background: #26890c; }
+        .leaderboard { text-align: left; background: white; color: #333; border-radius: 10px; padding: 10px; margin-top: 20px; }
+        .row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Биология: Жер шар дамуы</h1>
+
+        <div id="lobby">
+            <h2>Оқушылардың қосылуын күтудеміз...</h2>
+            <div id="qrcode"></div>
+            <p id="counter">Қатысушылар: 0</p>
+            <button class="btn" onclick="startGame()">Бастау / Начать</button>
+        </div>
+
+        <div id="quiz" style="display:none;">
+            <div id="question-display">
+                <div class="q-text" id="q-txt"></div>
+                <div class="ans-grid">
+                    <div class="ans-item a" id="opt-a"></div>
+                    <div class="ans-item b" id="opt-b"></div>
+                    <div class="ans-item c" id="opt-c"></div>
+                    <div class="ans-item d" id="opt-d"></div>
+                </div>
+            </div>
+            <button class="btn" style="margin-top:30px;" onclick="nextQuestion()">Келесі сұрақ</button>
+        </div>
+
+        <div id="results" style="display:none;">
+            <h2>Қорытынды Лидерборд</h2>
+            <div class="leaderboard" id="leaderboard"></div>
+            <button class="btn" onclick="location.reload()">Қайтадан бастау</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqOexBz5qOh_sBNjDl0wlacNkwMuUhgoU",
+            authDomain: "biologiatest1.firebaseapp.com",
+            projectId: "biologiatest1",
+            storageBucket: "biologiatest1.firebasestorage.app",
+            messagingSenderId: "952870084248",
+            appId: "1:952870084248:web:24f04ef5c261c3a0c23aed",
+            measurementId: "G-LZF9S0XE6",
+            databaseURL: "https://biologiatest1-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const questions = [
+            { q: "Жердің ең сыртқы қабаты?", a: "Литосфера", b: "Мантия", c: "Ядро", d: "Атмосфера", correct: "A" },
+            { q: "Пангея суперконтиненті қай заманда болды?", a: "Мезозой", b: "Палеозой", c: "Кайнозой", d: "Архей", correct: "B" },
+            { q: "Жердің ішкі өзегі?", a: "Қыртыс", b: "Мантия", c: "Ядро", d: "Литосфера", correct: "C" }
+        ];
+
+        let currentIndex = -1;
+        
+        // QR-код будет вести на index.html, который лежит в той же папке
+        const deployURL = window.location.href.replace('teacher.html', 'index.html');
+        new QRCode(document.getElementById("qrcode"), { text: deployURL, width: 200, height: 200 });
+
+        onValue(ref(db, 'players'), (snap) => {
+            const players = snap.val() || {};
+            document.getElementById('counter').innerText = `Қатысушылар: ${Object.keys(players).length}`;
+        });
+
+        window.startGame = function() {
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('quiz').style.display = 'block';
+            nextQuestion();
+        }
+
+        window.nextQuestion = function() {
+            currentIndex++;
+            if(currentIndex >= questions.length) return showFinal();
+            
+            const q = questions[currentIndex];
+            document.getElementById('q-txt').innerText = q.q;
+            document.getElementById('opt-a').innerText = "A: " + q.a;
+            document.getElementById('opt-b').innerText = "B: " + q.b;
+            document.getElementById('opt-c').innerText = "C: " + q.c;
+            document.getElementById('opt-d').innerText = "D: " + q.d;
+
+            set(ref(db, 'gameState'), { status: 'question', correct: q.correct, qId: currentIndex });
+        }
+
+        function showFinal() {
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            set(ref(db, 'gameState'), { status: 'finish' });
+
+            onValue(ref(db, 'players'), (snap) => {
+                const data = snap.val();
+                const lb = document.getElementById('leaderboard');
+                lb.innerHTML = '';
+                if(!data) return;
+                const sorted = Object.values(data).sort((a,b) => b.score - a.score);
+                sorted.forEach((p, i) => {
+                    lb.innerHTML += `<div class="row"><span>${i+1}. ${p.name}</span> <span>${p.score} ұпай</span></div>`;
+                });
+            }, { onlyOnce: true });
+        }
+
+        set(ref(db, 'gameState'), { status: 'lobby' });
+        set(ref(db, 'players'), null); 
+    </script>
+</body>
+</html>
