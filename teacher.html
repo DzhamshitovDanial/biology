@@ -2,52 +2,408 @@
 <html lang="kk">
 <head>
     <meta charset="UTF-8">
-    <title>Biology Quiz - Панель учителя</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Биология — Мұғалім панелі</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #46178f; color: white; text-align: center; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn { background: #1368ce; color: white; border: none; padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 12px; margin: 10px; transition: 0.2s; font-weight: bold; }
-        .btn:hover { transform: scale(1.05); background: #1a7df0; }
-        #qrcode { display: inline-block; padding: 15px; background: white; border-radius: 10px; margin: 20px 0; }
-        .q-text { font-size: 28px; margin: 20px 0; background: white; color: #333; padding: 20px; border-radius: 10px; }
-        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .ans-item { padding: 20px; font-size: 22px; border-radius: 10px; color: white; font-weight: bold; }
-        .a { background: #e21b3c; } .b { background: #1368ce; } .c { background: #d89e00; } .d { background: #26890c; }
-        .leaderboard { text-align: left; background: white; color: #333; border-radius: 10px; padding: 10px; margin-top: 20px; }
-        .row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 20px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #07070d;
+            --surface: #10101a;
+            --surface2: #181824;
+            --border: rgba(255,255,255,0.07);
+            --text: #eeeef5;
+            --muted: rgba(238,238,245,0.4);
+            --accent: #1a9e4a;
+            --accent-dim: rgba(26,158,74,0.12);
+            --a: #e63950;
+            --b: #1a6fe8;
+            --c: #c98b00;
+            --d: #1f8c0a;
+        }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 50% 40% at 15% 5%, rgba(26,158,74,0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 30% 30% at 85% 95%, rgba(26,158,74,0.06) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 36px;
+        }
+
+        .brand {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-family: 'Unbounded', sans-serif;
+            font-size: clamp(18px, 3vw, 26px);
+            font-weight: 900;
+            line-height: 1.15;
+        }
+
+        .role-badge {
+            background: var(--accent-dim);
+            border: 1px solid rgba(26,158,74,0.25);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            padding: 6px 14px;
+            border-radius: 100px;
+        }
+
+        /* ─── PANEL ─── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 16px;
+        }
+
+        .panel-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        /* ─── LOBBY ─── */
+        .lobby-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        #qrcode {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        #qrcode canvas, #qrcode img {
+            display: block;
+        }
+
+        .lobby-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .lobby-title {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .lobby-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .counter-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+        }
+
+        .counter-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2ed573;
+            box-shadow: 0 0 8px rgba(46,213,115,0.6);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .counter-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .counter-num {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-left: auto;
+        }
+
+        /* ─── BUTTONS ─── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'IBM Plex Sans', sans-serif;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: opacity 0.15s, transform 0.1s;
+            letter-spacing: 0.02em;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn:active { transform: scale(0.97); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.04);
+            opacity: 1;
+        }
+
+        /* ─── QUIZ ─── */
+        #quiz { display: none; }
+
+        .q-num {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .q-text {
+            font-family: 'Unbounded', sans-serif;
+            font-size: clamp(16px, 2.5vw, 22px);
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ans-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .ans-item {
+            padding: 18px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ans-letter {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            opacity: 0.8;
+            flex-shrink: 0;
+            width: 28px;
+        }
+
+        .a { background: var(--a); }
+        .b { background: var(--b); }
+        .c { background: var(--c); }
+        .d { background: var(--d); }
+
+        .quiz-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ─── RESULTS ─── */
+        #results { display: none; }
+
+        .results-header {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            transition: border-color 0.2s;
+        }
+
+        .lb-row.top { border-color: rgba(26,158,74,0.35); }
+
+        .lb-rank {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--muted);
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .lb-rank.gold { color: #f0c040; }
+        .lb-rank.silver { color: #aab4be; }
+        .lb-rank.bronze { color: #c47a3a; }
+
+        .lb-name {
+            font-size: 15px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .lb-score {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 560px) {
+            .lobby-grid { grid-template-columns: 1fr; }
+            .ans-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ─── ANIMATE IN ─── */
+        .panel { animation: slideUp 0.25s ease; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Биология: Жер шар дамуы</h1>
 
-        <div id="lobby">
-            <h2>Оқушылардың қосылуын күтудеміз...</h2>
-            <div id="qrcode"></div>
-            <p id="counter">Қатысушылар: 0</p>
-            <button class="btn" onclick="startGame()">Бастау / Начать</button>
+<div class="page">
+
+    <div class="header">
+        <div>
+            <div class="brand">Биология</div>
+            <div class="page-title">Жер шары дамуы</div>
         </div>
+        <div class="role-badge">Мұғалім</div>
+    </div>
 
-        <div id="quiz" style="display:none;">
-            <div id="question-display">
-                <div class="q-text" id="q-txt"></div>
-                <div class="ans-grid">
-                    <div class="ans-item a" id="opt-a"></div>
-                    <div class="ans-item b" id="opt-b"></div>
-                    <div class="ans-item c" id="opt-c"></div>
-                    <div class="ans-item d" id="opt-d"></div>
+    <!-- LOBBY -->
+    <div id="lobby">
+        <div class="panel">
+            <div class="panel-label">Кіру — QR код</div>
+            <div class="lobby-grid">
+                <div id="qrcode"></div>
+                <div class="lobby-info">
+                    <div class="lobby-title">Оқушылардың қосылуын күтудеміз</div>
+                    <p class="lobby-desc">Оқушылар телефондарымен QR кодты сканерлесін немесе сілтемені ашсын. Барлығы қосылғаннан кейін ойынды бастаңыз.</p>
+                    <div class="counter-block">
+                        <div class="counter-dot"></div>
+                        <div class="counter-text">Қатысушылар</div>
+                        <div class="counter-num" id="counter">0</div>
+                    </div>
+                    <button class="btn" onclick="startGame()">Бастау</button>
                 </div>
             </div>
-            <button class="btn" style="margin-top:30px;" onclick="nextQuestion()">Келесі сұрақ</button>
         </div>
+    </div>
 
-        <div id="results" style="display:none;">
-            <h2>Қорытынды Лидерборд</h2>
+    <!-- QUIZ -->
+    <div id="quiz">
+        <div class="panel">
+            <div class="q-num" id="q-num">Сұрақ 1 / 3</div>
+            <div class="q-text" id="q-txt"></div>
+            <div class="ans-grid">
+                <div class="ans-item a"><span class="ans-letter">A</span><span id="opt-a"></span></div>
+                <div class="ans-item b"><span class="ans-letter">B</span><span id="opt-b"></span></div>
+                <div class="ans-item c"><span class="ans-letter">C</span><span id="opt-c"></span></div>
+                <div class="ans-item d"><span class="ans-letter">D</span><span id="opt-d"></span></div>
+            </div>
+            <div class="quiz-actions">
+                <button class="btn" onclick="nextQuestion()">Келесі сұрақ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+        <div class="panel">
+            <div class="results-header">Қорытынды нәтижелер</div>
             <div class="leaderboard" id="leaderboard"></div>
             <button class="btn" onclick="location.reload()">Қайтадан бастау</button>
         </div>
     </div>
+
+</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -70,18 +426,19 @@
         const questions = [
             { q: "Жердің ең сыртқы қабаты?", a: "Литосфера", b: "Мантия", c: "Ядро", d: "Атмосфера", correct: "A" },
             { q: "Пангея суперконтиненті қай заманда болды?", a: "Мезозой", b: "Палеозой", c: "Кайнозой", d: "Архей", correct: "B" },
-            { q: "Жердің ішкі өзегі?", a: "Қыртыс", b: "Мантия", c: "Ядро", d: "Литосфера", correct: "C" }
+            { q: "Жердің ішкі өзегі?", a: "Қыртыс", b: "Мантия", c: "Ядро", d: "Литосфера", correct: "C" },
+            { q: "Континенттер қозғалысы теориясын кім ұсынды?", a: "Дарвин", b: "Вегенер", c: "Ньютон", d: "Эйнштейн", correct: "B" },
+            { q: "Жер қыртысының қалыңдығы мұхиттарда шамамен қанша км?", a: "5-10 км", b: "30-40 км", c: "100 км", d: "1 км", correct: "A" }
         ];
 
         let currentIndex = -1;
-        
-        // QR-код будет вести на index.html, который лежит в той же папке
+
         const deployURL = window.location.href.replace('teacher.html', 'index.html');
-        new QRCode(document.getElementById("qrcode"), { text: deployURL, width: 200, height: 200 });
+        new QRCode(document.getElementById("qrcode"), { text: deployURL, width: 180, height: 180 });
 
         onValue(ref(db, 'players'), (snap) => {
             const players = snap.val() || {};
-            document.getElementById('counter').innerText = `Қатысушылар: ${Object.keys(players).length}`;
+            document.getElementById('counter').textContent = Object.keys(players).length;
         });
 
         window.startGame = function() {
@@ -92,14 +449,15 @@
 
         window.nextQuestion = function() {
             currentIndex++;
-            if(currentIndex >= questions.length) return showFinal();
-            
+            if (currentIndex >= questions.length) return showFinal();
+
             const q = questions[currentIndex];
-            document.getElementById('q-txt').innerText = q.q;
-            document.getElementById('opt-a').innerText = "A: " + q.a;
-            document.getElementById('opt-b').innerText = "B: " + q.b;
-            document.getElementById('opt-c').innerText = "C: " + q.c;
-            document.getElementById('opt-d').innerText = "D: " + q.d;
+            document.getElementById('q-num').textContent = `Сұрақ ${currentIndex + 1} / ${questions.length}`;
+            document.getElementById('q-txt').textContent = q.q;
+            document.getElementById('opt-a').textContent = q.a;
+            document.getElementById('opt-b').textContent = q.b;
+            document.getElementById('opt-c').textContent = q.c;
+            document.getElementById('opt-d').textContent = q.d;
 
             set(ref(db, 'gameState'), { status: 'question', correct: q.correct, qId: currentIndex });
         }
@@ -113,16 +471,23 @@
                 const data = snap.val();
                 const lb = document.getElementById('leaderboard');
                 lb.innerHTML = '';
-                if(!data) return;
-                const sorted = Object.values(data).sort((a,b) => b.score - a.score);
+                if (!data) return;
+                const sorted = Object.values(data).sort((a, b) => b.score - a.score);
+                const rankClass = ['gold', 'silver', 'bronze'];
                 sorted.forEach((p, i) => {
-                    lb.innerHTML += `<div class="row"><span>${i+1}. ${p.name}</span> <span>${p.score} ұпай</span></div>`;
+                    const isTop = i < 3;
+                    lb.innerHTML += `
+                        <div class="lb-row ${isTop ? 'top' : ''}">
+                            <div class="lb-rank ${rankClass[i] || ''}">${i + 1}</div>
+                            <div class="lb-name">${p.name}</div>
+                            <div class="lb-score">${p.score} ұпай</div>
+                        </div>`;
                 });
             }, { onlyOnce: true });
         }
 
         set(ref(db, 'gameState'), { status: 'lobby' });
-        set(ref(db, 'players'), null); 
+        set(ref(db, 'players'), null);
     </script>
 </body>
 </html>

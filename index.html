@@ -3,34 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Биология - Пульт</title>
+    <title>Биология</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; margin: 0; background: #f0f0f0; text-align: center; overflow: hidden; }
-        .screen { padding: 20px; display: none; }
-        input { width: 80%; padding: 15px; margin: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 18px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 80vh; padding: 10px; }
-        button { border: none; color: white; font-size: 40px; font-weight: bold; border-radius: 10px; cursor: pointer; }
-        .a { background: #e21b3c; } .b { background: #1368ce; } .c { background: #d89e00; } .d { background: #26890c; }
-        .msg { margin-top: 40vh; font-size: 24px; font-weight: bold; color: #46178f; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --border: rgba(255,255,255,0.08);
+            --text: #f0f0f5;
+            --muted: rgba(240,240,245,0.45);
+            --accent: #1a9e4a;
+            --a: #e63950;
+            --b: #1a6fe8;
+            --c: #c98b00;
+            --d: #1f8c0a;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 10%, rgba(26,158,74,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 80% 90%, rgba(26,158,74,0.07) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .screen.active { display: flex; }
+
+        /* ─── LOGIN ─── */
+        #login {
+            gap: 0;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .brand {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .login-title {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--text);
+        }
+
+        .login-sub {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .field-wrap { display: flex; flex-direction: column; }
+
+        input[type="text"] {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]::placeholder { color: var(--muted); }
+        input[type="text"]:focus { border-color: var(--accent); }
+
+        .join-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'IBM Plex Sans', sans-serif;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+
+        .join-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+        /* ─── WAIT ─── */
+        #wait {
+            gap: 16px;
+            text-align: center;
+        }
+
+        .wait-indicator {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .wait-text {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .wait-sub {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* ─── GAME ─── */
+        #game {
+            padding: 0;
+        }
+
+        .answer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+        }
+
+        .ans-btn {
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Unbounded', sans-serif;
+            font-size: clamp(32px, 8vw, 56px);
+            font-weight: 900;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s, filter 0.1s;
+        }
+
+        .ans-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0);
+            transition: background 0.15s;
+        }
+
+        .ans-btn:active { transform: scale(0.96); filter: brightness(0.9); }
+
+        .ans-btn.a { background: var(--a); }
+        .ans-btn.b { background: var(--b); }
+        .ans-btn.c { background: var(--c); }
+        .ans-btn.d { background: var(--d); }
+
+        /* ─── ANSWERED ─── */
+        #wait .answered-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .check-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(124,92,252,0.15);
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .check-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: var(--accent);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        /* transition between screens */
+        .screen { animation: none; }
+        .screen.active { animation: fadeIn 0.2s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <div id="login" class="screen" style="display:block;">
-        <h2>Есіміңізді енгізіңіз</h2>
-        <input type="text" id="username" placeholder="Аты-жөні">
-        <button onclick="join()" style="background:#46178f; padding:15px; width:80%; font-size:20px;">Қосылу</button>
+
+    <!-- LOGIN -->
+    <div id="login" class="screen active">
+        <div class="login-card">
+            <div>
+                <div class="brand">Биология</div>
+                <div class="login-title">Викторинаға қосылу</div>
+            </div>
+            <p class="login-sub">Атыңызды енгізіп, ойынға кіріңіз. Мұғалім сұрақты іске қосқаннан кейін жауап беруге болады.</p>
+            <div class="field-wrap">
+                <div class="field-label">Аты-жөні</div>
+                <input type="text" id="username" placeholder="Атыңызды жазыңыз">
+            </div>
+            <button class="join-btn" onclick="join()">Қосылу</button>
+        </div>
     </div>
 
+    <!-- WAIT -->
     <div id="wait" class="screen">
-        <div class="msg" id="wait-msg">Мұғалімді күтіңіз...</div>
+        <div class="wait-indicator" id="wait-spinner"></div>
+        <div class="wait-text" id="wait-msg">Мұғалімді күтіңіз</div>
+        <div class="wait-sub" id="wait-sub">Сұрақ жақын арада басталады</div>
     </div>
 
+    <!-- GAME -->
     <div id="game" class="screen">
-        <div class="grid">
-            <button class="a" onclick="answer('A')">A</button>
-            <button class="b" onclick="answer('B')">B</button>
-            <button class="c" onclick="answer('C')">C</button>
-            <button class="d" onclick="answer('D')">D</button>
+        <div class="answer-grid">
+            <button class="ans-btn a" onclick="answer('A')">A</button>
+            <button class="ans-btn b" onclick="answer('B')">B</button>
+            <button class="ans-btn c" onclick="answer('C')">C</button>
+            <button class="ans-btn d" onclick="answer('D')">D</button>
         </div>
     </div>
 
@@ -56,37 +308,42 @@
         let answered = false;
 
         window.join = function() {
-            const name = document.getElementById('username').value;
-            if(!name) return alert("Атыңызды жазыңыз!");
+            const name = document.getElementById('username').value.trim();
+            if (!name) {
+                document.getElementById('username').focus();
+                return;
+            }
             set(ref(db, 'players/' + myId), { name: name, score: 0 });
             showScreen('wait');
+            setWait('Мұғалімді күтіңіз', 'Сұрақ жақын арада басталады', true);
             listenGame();
         }
 
         function listenGame() {
             onValue(ref(db, 'gameState'), (snap) => {
                 const state = snap.val();
-                if(!state) return;
-                if(state.status === 'question') {
+                if (!state) return;
+                if (state.status === 'question') {
                     correctLetter = state.correct;
                     answered = false;
                     showScreen('game');
                 } else if (state.status === 'finish') {
                     showScreen('wait');
-                    document.getElementById('wait-msg').innerText = "Ойын аяқталды!";
+                    setWait('Ойын аяқталды', 'Нәтижелерді мұғалімнен біліңіз', false);
                 } else {
                     showScreen('wait');
+                    setWait('Мұғалімді күтіңіз', 'Сұрақ жақын арада басталады', true);
                 }
             });
         }
 
         window.answer = async function(letter) {
-            if(answered) return;
+            if (answered) return;
             answered = true;
             showScreen('wait');
-            document.getElementById('wait-msg').innerText = "Жауап қабылданды!";
+            setWait('Жауап қабылданды', 'Келесі сұрақты күтіңіз', false);
 
-            if(letter === correctLetter) {
+            if (letter === correctLetter) {
                 const pRef = ref(db, 'players/' + myId);
                 const snap = await get(pRef);
                 const currentScore = snap.val().score || 0;
@@ -94,9 +351,21 @@
             }
         }
 
+        function setWait(title, sub, spinning) {
+            document.getElementById('wait-msg').textContent = title;
+            document.getElementById('wait-sub').textContent = sub;
+            const spinner = document.getElementById('wait-spinner');
+            spinner.style.display = spinning ? 'block' : 'none';
+        }
+
         function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-            document.getElementById(id).style.display = 'block';
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+                s.style.display = 'none';
+            });
+            const el = document.getElementById(id);
+            el.style.display = 'flex';
+            requestAnimationFrame(() => el.classList.add('active'));
         }
     </script>
 </body>
