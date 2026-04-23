@@ -51,7 +51,6 @@
             z-index: 1;
         }
 
-        /* ─── HEADER ─── */
         .header {
             display: flex;
             align-items: flex-start;
@@ -87,7 +86,6 @@
             border-radius: 100px;
         }
 
-        /* ─── PANEL ─── */
         .panel {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -105,7 +103,6 @@
             margin-bottom: 20px;
         }
 
-        /* ─── LOBBY ─── */
         .lobby-grid {
             display: grid;
             grid-template-columns: auto 1fr;
@@ -180,7 +177,6 @@
             margin-left: auto;
         }
 
-        /* ─── BUTTONS ─── */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -202,18 +198,6 @@
         .btn:hover { opacity: 0.9; }
         .btn:active { transform: scale(0.97); }
 
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-outline:hover {
-            background: rgba(255,255,255,0.04);
-            opacity: 1;
-        }
-
-        /* ─── QUIZ ─── */
         #quiz { display: none; }
 
         .q-num {
@@ -274,7 +258,6 @@
             gap: 12px;
         }
 
-        /* ─── RESULTS ─── */
         #results { display: none; }
 
         .results-header {
@@ -299,7 +282,6 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 14px 18px;
-            transition: border-color 0.2s;
         }
 
         .lb-row.top { border-color: rgba(26,158,74,0.35); }
@@ -331,13 +313,11 @@
             color: var(--accent);
         }
 
-        /* ─── RESPONSIVE ─── */
         @media (max-width: 560px) {
             .lobby-grid { grid-template-columns: 1fr; }
             .ans-grid { grid-template-columns: 1fr; }
         }
 
-        /* ─── ANIMATE IN ─── */
         .panel { animation: slideUp 0.25s ease; }
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(10px); }
@@ -348,7 +328,6 @@
 <body>
 
 <div class="page">
-
     <div class="header">
         <div>
             <div class="brand">Биология</div>
@@ -357,7 +336,6 @@
         <div class="role-badge">Мұғалім</div>
     </div>
 
-    <!-- LOBBY -->
     <div id="lobby">
         <div class="panel">
             <div class="panel-label">Кіру — QR код</div>
@@ -365,7 +343,7 @@
                 <div id="qrcode"></div>
                 <div class="lobby-info">
                     <div class="lobby-title">Оқушылардың қосылуын күтудеміз</div>
-                    <p class="lobby-desc">Оқушылар телефондарымен QR кодты сканерлесін немесе сілтемені ашсын. Барлығы қосылғаннан кейін ойынды бастаңыз.</p>
+                    <p class="lobby-desc">Оқушылар телефондарымен QR кодты сканерлесін. Барлығы қосылғаннан кейін ойынды бастаңыз.</p>
                     <div class="counter-block">
                         <div class="counter-dot"></div>
                         <div class="counter-text">Қатысушылар</div>
@@ -377,10 +355,9 @@
         </div>
     </div>
 
-    <!-- QUIZ -->
     <div id="quiz">
         <div class="panel">
-            <div class="q-num" id="q-num">Сұрақ 1 / 3</div>
+            <div class="q-num" id="q-num">Сұрақ 1 / 5</div>
             <div class="q-text" id="q-txt"></div>
             <div class="ans-grid">
                 <div class="ans-item a"><span class="ans-letter">A</span><span id="opt-a"></span></div>
@@ -394,7 +371,6 @@
         </div>
     </div>
 
-    <!-- RESULTS -->
     <div id="results">
         <div class="panel">
             <div class="results-header">Қорытынды нәтижелер</div>
@@ -402,96 +378,111 @@
             <button class="btn" onclick="location.reload()">Қайтадан бастау</button>
         </div>
     </div>
-
 </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAqOexBz5qOh_sBNjDl0wlacNkwMuUhgoU",
-            authDomain: "biologiatest1.firebaseapp.com",
-            projectId: "biologiatest1",
-            storageBucket: "biologiatest1.firebasestorage.app",
-            messagingSenderId: "952870084248",
-            appId: "1:952870084248:web:24f04ef5c261c3a0c23aed",
-            measurementId: "G-LZF9S0XE6",
-            databaseURL: "https://biologiatest1-default-rtdb.firebaseio.com/"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqOexBz5qOh_sBNjDl0wlacNkwMuUhgoU",
+        authDomain: "biologiatest1.firebaseapp.com",
+        projectId: "biologiatest1",
+        storageBucket: "biologiatest1.firebasestorage.app",
+        messagingSenderId: "952870084248",
+        appId: "1:952870084248:web:24f04ef5c261c3a0c23aed",
+        measurementId: "G-LZF9S0XE6",
+        databaseURL: "https://biologiatest1-default-rtdb.firebaseio.com/"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        const questions = [
-            { q: "Жердің ең сыртқы қабаты?", a: "Литосфера", b: "Мантия", c: "Ядро", d: "Атмосфера", correct: "A" },
-            { q: "Пангея суперконтиненті қай заманда болды?", a: "Мезозой", b: "Палеозой", c: "Кайнозой", d: "Архей", correct: "B" },
-            { q: "Жердің ішкі өзегі?", a: "Қыртыс", b: "Мантия", c: "Ядро", d: "Литосфера", correct: "C" },
-            { q: "Континенттер қозғалысы теориясын кім ұсынды?", a: "Дарвин", b: "Вегенер", c: "Ньютон", d: "Эйнштейн", correct: "B" },
-            { q: "Жер қыртысының қалыңдығы мұхиттарда шамамен қанша км?", a: "5-10 км", b: "30-40 км", c: "100 км", d: "1 км", correct: "A" }
-        ];
+    const questions = [
+        { 
+            q: "Жердегі тіршілік дамуы неше заманға бөлінеді?", 
+            a: "5 заман", b: "3 заман", c: "6 заман", d: "4 заман", 
+            correct: "A" 
+        },
+        { 
+            q: "Ағзалардың құрлыққа шығуы қай заманда басталды?", 
+            a: "Мезозой", b: "Палеозой", c: "Кайнозой", d: "Архей", 
+            correct: "B" 
+        },
+        { 
+            q: "Динозаврлардың дәуірлеуі (эрасы) қай заманға жатады?", 
+            a: "Протерозой", b: "Палеозой", c: "Мезозой", d: "Кайнозой", 
+            correct: "C" 
+        },
+        { 
+            q: "Адамның пайда болуы және антропогенез қай заманға тән?", 
+            a: "Кайнозой", b: "Мезозой", c: "Палеозой", d: "Архей", 
+            correct: "A" 
+        },
+        { 
+            q: "Жер тарихындағы ең ұзаққа созылған заманды атаңыз:", 
+            a: "Кайнозой", b: "Протерозой", c: "Мезозой", d: "Архей", 
+            correct: "B" 
+        }
+    ];
 
-        let currentIndex = -1;
+    let currentIndex = -1;
 
-        const deployURL = "https://dzhamshitovdanial.github.io/biology/index.html";
-new QRCode(document.getElementById("qrcode"), { 
-    text: deployURL, 
-    width: 200, 
-    height: 200 
-});
+    const deployURL = window.location.href.replace('teacher.html', 'index.html');
+    new QRCode(document.getElementById("qrcode"), { text: deployURL, width: 180, height: 180 });
+
+    onValue(ref(db, 'players'), (snap) => {
+        const players = snap.val() || {};
+        document.getElementById('counter').textContent = Object.keys(players).length;
+    });
+
+    window.startGame = function() {
+        document.getElementById('lobby').style.display = 'none';
+        document.getElementById('quiz').style.display = 'block';
+        nextQuestion();
+    }
+
+    window.nextQuestion = function() {
+        currentIndex++;
+        if (currentIndex >= questions.length) return showFinal();
+
+        const q = questions[currentIndex];
+        document.getElementById('q-num').textContent = `Сұрақ ${currentIndex + 1} / ${questions.length}`;
+        document.getElementById('q-txt').textContent = q.q;
+        document.getElementById('opt-a').textContent = q.a;
+        document.getElementById('opt-b').textContent = q.b;
+        document.getElementById('opt-c').textContent = q.c;
+        document.getElementById('opt-d').textContent = q.d;
+
+        set(ref(db, 'gameState'), { status: 'question', correct: q.correct, qId: currentIndex });
+    }
+
+    function showFinal() {
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('results').style.display = 'block';
+        set(ref(db, 'gameState'), { status: 'finish' });
 
         onValue(ref(db, 'players'), (snap) => {
-            const players = snap.val() || {};
-            document.getElementById('counter').textContent = Object.keys(players).length;
-        });
+            const data = snap.val();
+            const lb = document.getElementById('leaderboard');
+            lb.innerHTML = '';
+            if (!data) return;
+            const sorted = Object.values(data).sort((a, b) => b.score - a.score);
+            const rankClass = ['gold', 'silver', 'bronze'];
+            sorted.forEach((p, i) => {
+                const isTop = i < 3;
+                lb.innerHTML += `
+                    <div class="lb-row ${isTop ? 'top' : ''}">
+                        <div class="lb-rank ${rankClass[i] || ''}">${i + 1}</div>
+                        <div class="lb-name">${p.name}</div>
+                        <div class="lb-score">${p.score} ұпай</div>
+                    </div>`;
+            });
+        }, { onlyOnce: true });
+    }
 
-        window.startGame = function() {
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('quiz').style.display = 'block';
-            nextQuestion();
-        }
-
-        window.nextQuestion = function() {
-            currentIndex++;
-            if (currentIndex >= questions.length) return showFinal();
-
-            const q = questions[currentIndex];
-            document.getElementById('q-num').textContent = `Сұрақ ${currentIndex + 1} / ${questions.length}`;
-            document.getElementById('q-txt').textContent = q.q;
-            document.getElementById('opt-a').textContent = q.a;
-            document.getElementById('opt-b').textContent = q.b;
-            document.getElementById('opt-c').textContent = q.c;
-            document.getElementById('opt-d').textContent = q.d;
-
-            set(ref(db, 'gameState'), { status: 'question', correct: q.correct, qId: currentIndex });
-        }
-
-        function showFinal() {
-            document.getElementById('quiz').style.display = 'none';
-            document.getElementById('results').style.display = 'block';
-            set(ref(db, 'gameState'), { status: 'finish' });
-
-            onValue(ref(db, 'players'), (snap) => {
-                const data = snap.val();
-                const lb = document.getElementById('leaderboard');
-                lb.innerHTML = '';
-                if (!data) return;
-                const sorted = Object.values(data).sort((a, b) => b.score - a.score);
-                const rankClass = ['gold', 'silver', 'bronze'];
-                sorted.forEach((p, i) => {
-                    const isTop = i < 3;
-                    lb.innerHTML += `
-                        <div class="lb-row ${isTop ? 'top' : ''}">
-                            <div class="lb-rank ${rankClass[i] || ''}">${i + 1}</div>
-                            <div class="lb-name">${p.name}</div>
-                            <div class="lb-score">${p.score} ұпай</div>
-                        </div>`;
-                });
-            }, { onlyOnce: true });
-        }
-
-        set(ref(db, 'gameState'), { status: 'lobby' });
-        set(ref(db, 'players'), null);
-    </script>
+    set(ref(db, 'gameState'), { status: 'lobby' });
+    set(ref(db, 'players'), null);
+</script>
 </body>
 </html>
