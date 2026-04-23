@@ -433,8 +433,12 @@
 
         let currentIndex = -1;
 
-        const deployURL = window.location.href.replace('teacher.html', 'index.html');
-        new QRCode(document.getElementById("qrcode"), { text: deployURL, width: 180, height: 180 });
+        const deployURL = "https://dzhamshitovdanial.github.io/biology/index.html";
+new QRCode(document.getElementById("qrcode"), { 
+    text: deployURL, 
+    width: 200, 
+    height: 200 
+});
 
         onValue(ref(db, 'players'), (snap) => {
             const players = snap.val() || {};
